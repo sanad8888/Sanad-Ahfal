@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Veterinary clinic product or medication in stock",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "barcode": { "type": "string" },
+        "category": { "type": "string" },
+        "costPrice": { "type": "number" },
+        "sellPrice": { "type": "number" },
+        "quantity": { "type": "number" },
+        "minQuantity": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "activeIngredient": { "type": "string" },
+        "dosageInstructions": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "costPrice", "sellPrice", "quantity", "minQuantity"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Clinic customer or animal breeder",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "taxNumber": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Veterinary clinic sales or treatment invoice",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "paid", "cancelled"] },
+        "subtotal": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "discount": { "type": "number" },
+        "total": { "type": "number" },
+        "items": { "type": "array" },
+        "issueDate": { "type": "string", "format": "date-time" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "invoiceNumber", "status", "subtotal", "taxAmount", "total"]
+    },
+    "StockMovement": {
+      "title": "StockMovement",
+      "description": "Record of stock incoming, outgoing, or adjustment",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "type": { "type": "string", "enum": ["in", "out", "adjustment"] },
+        "quantity": { "type": "number" },
+        "previousQuantity": { "type": "number" },
+        "newQuantity": { "type": "number" },
+        "invoiceId": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "productId", "type", "quantity"]
+    },
+    "ClinicSettings": {
+      "title": "ClinicSettings",
+      "description": "Veterinary clinic tax, currency, and identity configuration",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "clinicName": { "type": "string" },
+        "clinicPhone": { "type": "string" },
+        "clinicAddress": { "type": "string" },
+        "taxNumber": { "type": "string" },
+        "currencySymbol": { "type": "string" },
+        "vatPercentage": { "type": "number" },
+        "invoiceHeader": { "type": "string" },
+        "invoiceFooter": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "clinicName", "currencySymbol", "vatPercentage"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Veterinary clinic medicines and inventory items for a user"
+    },
+    "/users/{userId}/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Customer and client registry for a user"
+    },
+    "/users/{userId}/invoices/{invoiceId}": {
+      "schema": { "$ref": "#/entities/Invoice" },
+      "description": "Sales and treatment invoices for a user"
+    },
+    "/users/{userId}/stock_movements/{movementId}": {
+      "schema": { "$ref": "#/entities/StockMovement" },
+      "description": "Inventory movement audit log for a user"
+    },
+    "/users/{userId}/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/ClinicSettings" },
+      "description": "Clinic identity and tax/currency settings for a user"
+    }
+  }
+}

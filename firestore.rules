@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidProduct(data) {
+      return data.userId is string &&
+             data.name is string && data.name.size() > 0 &&
+             data.costPrice is number && data.costPrice >= 0 &&
+             data.sellPrice is number && data.sellPrice >= 0 &&
+             data.quantity is number &&
+             data.minQuantity is number && data.minQuantity >= 0;
+    }
+
+    function isValidCustomer(data) {
+      return data.userId is string &&
+             data.name is string && data.name.size() > 0;
+    }
+
+    function isValidInvoice(data) {
+      return data.userId is string &&
+             data.invoiceNumber is string && data.invoiceNumber.size() > 0 &&
+             data.status in ['draft', 'paid', 'cancelled'] &&
+             data.subtotal is number &&
+             data.taxAmount is number &&
+             data.total is number;
+    }
+
+    function isValidStockMovement(data) {
+      return data.userId is string &&
+             data.productId is string &&
+             data.type in ['in', 'out', 'adjustment'] &&
+             data.quantity is number;
+    }
+
+    function isValidClinicSettings(data) {
+      return data.userId is string &&
+             data.clinicName is string && data.clinicName.size() > 0 &&
+             data.currencySymbol is string &&
+             data.vatPercentage is number && data.vatPercentage >= 0;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /products/{productId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidProduct(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /customers/{customerId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidCustomer(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /invoices/{invoiceId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidInvoice(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /stock_movements/{movementId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidStockMovement(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /settings/{settingId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidClinicSettings(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
